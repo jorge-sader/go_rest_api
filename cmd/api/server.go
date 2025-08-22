@@ -8,20 +8,9 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/jorge-sader/go-rest-api/internal/api/middlewares"
 	"golang.org/x/net/http2"
 )
-
-func loadClientCAs() *x509.CertPool {
-	clientCAs := x509.NewCertPool()
-
-	caCert, err := os.ReadFile("cert.pem")
-	if err != nil {
-		log.Fatalln("Error loading client CA:", err)
-	}
-
-	clientCAs.AppendCertsFromPEM(caCert)
-	return clientCAs
-}
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	logRequestDetails(r)
@@ -98,12 +87,6 @@ func execsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/", rootHandler)
-	http.HandleFunc("/teachers", teachersHandler)
-
-	http.HandleFunc("/students", studentsHandler)
-
-	http.HandleFunc("/execs", execsHandler)
 
 	port := 3000
 
@@ -111,11 +94,19 @@ func main() {
 	cert := "cmd/api/cert.pem"
 	key := "cmd/api/key.pem"
 
+	mux := http.NewServeMux()
+
+	// Routes
+	mux.HandleFunc("/", rootHandler)
+	mux.HandleFunc("/teachers", teachersHandler)
+	mux.HandleFunc("/students", studentsHandler)
+	mux.HandleFunc("/execs", execsHandler)
+
 	// Configure TLS
 	tlsConfig := &tls.Config{
 		MinVersion: tls.VersionTLS12,
-		// mTLS Config
-		// mTLS is more secure but impractical as Client must have same certificate as Server)
+		// // Mutual TLS (mTLS) Config
+		// // mTLS is more secure but impractical as Client must have same certificate as Server)
 		// ClientAuth: tls.RequireAndVerifyClientCert, // enforce mTLS
 		// ClientCAs:  loadClientCAs(),
 	}
@@ -123,7 +114,7 @@ func main() {
 	// Create custom server
 	server := &http.Server{
 		Addr:      fmt.Sprintf(":%d", port),
-		Handler:   nil,
+		Handler:   middlewares.SecurityHeaders(mux),
 		TLSConfig: tlsConfig,
 	}
 
@@ -198,4 +189,17 @@ func GetTLSVersionName(tlsConnState *tls.ConnectionState) string {
 	}
 
 	return tlsVersion
+}
+
+// loadClientCAs loads client certificates of authorization required for mutual TLS (mTLS)
+func loadClientCAs() *x509.CertPool {
+	clientCAs := x509.NewCertPool()
+
+	caCert, err := os.ReadFile("cert.pem")
+	if err != nil {
+		log.Fatalln("Error loading client CA:", err)
+	}
+
+	clientCAs.AppendCertsFromPEM(caCert)
+	return clientCAs
 }
