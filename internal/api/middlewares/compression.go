@@ -15,7 +15,6 @@ func Compression(next http.Handler) http.Handler {
 		}
 
 		// Set the response header
-
 		w.Header().Set("content-Encoding", "gzip")
 		gz := gzip.NewWriter(w)
 		defer gz.Close()
