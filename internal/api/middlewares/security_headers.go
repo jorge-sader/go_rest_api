@@ -15,12 +15,7 @@ func SecurityHeaders(next http.Handler) http.Handler {
 		w.Header().Set("Server", "")
 		w.Header().Set("x-permitted-cross-domain-policies", "none")
 		w.Header().Set("cache-control", "no-store, no-cache, must-revalidate, max-age=0")
-		w.Header().Set("cross-origin-resource-policy", "same-origin")
-		w.Header().Set("cross-origin-opener-policy", "same-origin")
-		w.Header().Set("cross-origin-embedder-policy", "require-corp")
-		w.Header().Set("access-control-allow-headers", "Content-type, Authorization")
-		w.Header().Set("access-control-allow-methods", "GET, POST, PUT, PATCH, DELETE")
-		w.Header().Set("access-control-allow-credentials", "true")
+
 		w.Header().Set("permissions-policy", "geo-location=(self), microphone=()")
 
 		next.ServeHTTP(w, r)
