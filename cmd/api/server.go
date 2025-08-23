@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 
 	mw "github.com/jorge-sader/go-rest-api/internal/api/middlewares"
 	"github.com/jorge-sader/go-rest-api/pkg/utils"
@@ -98,24 +97,25 @@ func main() {
 		// ClientCAs:  loadClientCAs(),
 	}
 
-	rl := mw.NewRateLimiter(20, time.Minute)
-
-	hppOptions := mw.HPPOptions{
-		CheckQuery:                  true,
-		CheckBody:                   true,
-		CheckBodyOnlyForContentType: "application/x-www-form-urlencoded",
-		Whitelist:                   []string{"sort_by", "sort_order", "first_name", "last_name", "classroom", "subject"},
-	}
+	// TODO: uncomment/reevaluate after routes are done
+	// 	// rl := mw.NewRateLimiter(20, time.Minute)
+	//
+	// 	hppOptions := mw.HPPOptions{
+	// 		CheckQuery:                  true,
+	// 		CheckBody:                   true,
+	// 		CheckBodyOnlyForContentType: "application/x-www-form-urlencoded",
+	// 		Whitelist:                   []string{"sort_by", "sort_order", "first_name", "last_name", "classroom", "subject"},
+	// 	}
 
 	// secureMux establishes the middleware chain that secures our server
 	// secureMux := mw.Cors(rl.Middleware(mw.ResponseTime(mw.SecurityHeaders(mw.Compression(mw.Hpp(hppOptions)(mux))))))
 	secureMux := utils.ApplyMiddlewares(mux,
 		// Innermost (runs last, ends first)
-		mw.Hpp(hppOptions), // TODO: uncomment/reevaluate after routes are done
-		mw.Compression,     // TODO: uncomment/reevaluate after routes are done
+		// mw.Hpp(hppOptions), // TODO: uncomment/reevaluate after routes are done
+		// mw.Compression,     // TODO: uncomment/reevaluate after routes are done
 		mw.SecurityHeaders,
-		mw.ResponseTime, // TODO: uncomment/reevaluate after routes are done
-		rl.Middleware,   // TODO: uncomment/reevaluate after routes are done
+		// mw.ResponseTime, // TODO: uncomment/reevaluate after routes are done
+		// rl.Middleware,   // TODO: uncomment/reevaluate after routes are done
 		mw.Cors,
 		// Outermost (runs first, ends last)
 	)
