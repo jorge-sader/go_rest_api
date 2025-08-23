@@ -114,7 +114,7 @@ func main() {
 	// Create custom server
 	server := &http.Server{
 		Addr:      fmt.Sprintf(":%d", port),
-		Handler:   middlewares.SecurityHeaders(mux),
+		Handler:   middlewares.SecurityHeaders(middlewares.Cors(mux)),
 		TLSConfig: tlsConfig,
 	}
 
