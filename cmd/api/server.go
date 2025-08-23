@@ -10,6 +10,7 @@ import (
 	"time"
 
 	mw "github.com/jorge-sader/go-rest-api/internal/api/middlewares"
+	"github.com/jorge-sader/go-rest-api/pkg/utils"
 	"golang.org/x/net/http2"
 )
 
@@ -107,7 +108,17 @@ func main() {
 	}
 
 	// secureMux establishes the middleware chain that secures our server
-	secureMux := mw.Hpp(hppOptions)(rl.Middleware(mw.Compression(mw.ResponseTime(mw.SecurityHeaders(mw.Cors(mux))))))
+	// secureMux := mw.Cors(rl.Middleware(mw.ResponseTime(mw.SecurityHeaders(mw.Compression(mw.Hpp(hppOptions)(mux))))))
+	secureMux := utils.ApplyMiddlewares(mux,
+		// Innermost (runs last, ends first)
+		mw.Hpp(hppOptions), // TODO: uncomment/reevaluate after routes are done
+		mw.Compression,     // TODO: uncomment/reevaluate after routes are done
+		mw.SecurityHeaders,
+		mw.ResponseTime, // TODO: uncomment/reevaluate after routes are done
+		rl.Middleware,   // TODO: uncomment/reevaluate after routes are done
+		mw.Cors,
+		// Outermost (runs first, ends last)
+	)
 
 	// Create custom server
 	server := &http.Server{
