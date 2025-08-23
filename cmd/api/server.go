@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/jorge-sader/go-rest-api/internal/api/middlewares"
+	mw "github.com/jorge-sader/go-rest-api/internal/api/middlewares"
 	"golang.org/x/net/http2"
 )
 
@@ -114,7 +114,7 @@ func main() {
 	// Create custom server
 	server := &http.Server{
 		Addr:      fmt.Sprintf(":%d", port),
-		Handler:   middlewares.SecurityHeaders(middlewares.Cors(mux)),
+		Handler:   mw.Compression(mw.ResponseTime(mw.SecurityHeaders(mw.Cors(mux)))),
 		TLSConfig: tlsConfig,
 	}
 
