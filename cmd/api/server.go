@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	mw "github.com/jorge-sader/go-rest-api/internal/api/middlewares"
 	"golang.org/x/net/http2"
@@ -22,19 +23,14 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 func teachersHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
-		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL)
 		fmt.Fprintf(w, "Received %s request on '%s' route\n", r.Method, r.URL)
 	case http.MethodGet:
-		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL)
 		fmt.Fprintf(w, "Received %s request on '%s' route\n", r.Method, r.URL)
 	case http.MethodPut:
-		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL)
 		fmt.Fprintf(w, "Received %s request on '%s' route\n", r.Method, r.URL)
 	case http.MethodPatch:
-		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL)
 		fmt.Fprintf(w, "Received %s request on '%s' route\n", r.Method, r.URL)
 	case http.MethodDelete:
-		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL)
 		fmt.Fprintf(w, "Received %s request on '%s' route\n", r.Method, r.URL)
 	}
 
@@ -45,19 +41,14 @@ func teachersHandler(w http.ResponseWriter, r *http.Request) {
 func studentsHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
-		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL)
 		fmt.Fprintf(w, "Received %s request on '%s' route\n", r.Method, r.URL)
 	case http.MethodGet:
-		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL)
 		fmt.Fprintf(w, "Received %s request on '%s' route\n", r.Method, r.URL)
 	case http.MethodPut:
-		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL)
 		fmt.Fprintf(w, "Received %s request on '%s' route\n", r.Method, r.URL)
 	case http.MethodPatch:
-		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL)
 		fmt.Fprintf(w, "Received %s request on '%s' route\n", r.Method, r.URL)
 	case http.MethodDelete:
-		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL)
 		fmt.Fprintf(w, "Received %s request on '%s' route\n", r.Method, r.URL)
 	}
 	w.Write([]byte("Howdy Y'all"))
@@ -67,19 +58,14 @@ func studentsHandler(w http.ResponseWriter, r *http.Request) {
 func execsHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
-		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL)
 		fmt.Fprintf(w, "Received %s request on '%s' route\n", r.Method, r.URL)
 	case http.MethodGet:
-		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL)
 		fmt.Fprintf(w, "Received %s request on '%s' route\n", r.Method, r.URL)
 	case http.MethodPut:
-		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL)
 		fmt.Fprintf(w, "Received %s request on '%s' route\n", r.Method, r.URL)
 	case http.MethodPatch:
-		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL)
 		fmt.Fprintf(w, "Received %s request on '%s' route\n", r.Method, r.URL)
 	case http.MethodDelete:
-		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL)
 		fmt.Fprintf(w, "Received %s request on '%s' route\n", r.Method, r.URL)
 	}
 	w.Write([]byte("Good morning Executives!"))
@@ -111,10 +97,11 @@ func main() {
 		// ClientCAs:  loadClientCAs(),
 	}
 
+	rl := mw.NewRateLimiter(20, time.Minute)
 	// Create custom server
 	server := &http.Server{
 		Addr:      fmt.Sprintf(":%d", port),
-		Handler:   mw.Compression(mw.ResponseTime(mw.SecurityHeaders(mw.Cors(mux)))),
+		Handler:   rl.Middleware(mw.Compression(mw.ResponseTime(mw.SecurityHeaders(mw.Cors(mux))))),
 		TLSConfig: tlsConfig,
 	}
 
