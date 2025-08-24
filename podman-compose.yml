@@ -4,9 +4,9 @@ services:
   mariadb:
     image: docker.io/library/mariadb:latest
     environment:
-      - MYSQL_ROOT_PASSWORD=Root@fedh4s
-      - MYSQL_DATABASE=school
-      - MYSQL_USER=mysql
+      - MYSQL_ROOT_PASSWORD=MySQLRootPassword
+      - MYSQL_DATABASE=go-rest-api
+      - MYSQL_USER=MySQLUser
       - MYSQL_PASSWORD=MySQLPassword
     ports:
       - '3306:3306'
