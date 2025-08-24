@@ -18,11 +18,11 @@ import (
 )
 
 type Teacher struct {
-	ID        int
-	FirstName string
-	LastName  string
-	Classroom string
-	Subject   string
+	ID        int    `json:"id,omitempty"`
+	FirstName string `json:"first_name,omitempty"`
+	LastName  string `json:"last_name,omitempty"`
+	Classroom string `json:"classroom,omitempty"`
+	Subject   string `json:"subject,omitempty"`
 }
 
 var teachers = make(map[int]Teacher)
@@ -110,6 +110,38 @@ func getTeachersHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func addTeacherHandler(w http.ResponseWriter, r *http.Request) {
+	mutex.Lock()
+	defer mutex.Unlock()
+
+	var newTeachers []Teacher
+	err := json.NewDecoder(r.Body).Decode(&newTeachers)
+	if err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	addedTeachers := make([]Teacher, len(newTeachers))
+	for i, newTeacher := range newTeachers {
+		newTeacher.ID = nextID
+		teachers[nextID] = newTeacher
+		addedTeachers[i] = newTeacher
+		nextID++
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	response := struct {
+		Status string    `json:"status"`
+		Count  int       `json:"count"`
+		Data   []Teacher `json:"data"`
+	}{
+		Status: "success",
+		Count:  len(addedTeachers),
+		Data:   addedTeachers,
+	}
+	json.NewEncoder(w).Encode(response)
+}
+
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	logRequestDetails(r)
 	fmt.Fprintln(w, "Hello Gorgeous")
@@ -121,6 +153,7 @@ func teachersHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
 		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL) // DEBUG
+		addTeacherHandler(w, r)
 
 	case http.MethodGet:
 		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL) // DEBUG
