@@ -3,15 +3,112 @@ package main
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
+	"sync"
 
 	mw "github.com/jorge-sader/go-rest-api/internal/api/middlewares"
 	"github.com/jorge-sader/go-rest-api/pkg/utils"
 	"golang.org/x/net/http2"
 )
+
+type Teacher struct {
+	ID        int
+	FirstName string
+	LastName  string
+	Classroom string
+	Subject   string
+}
+
+var teachers = make(map[int]Teacher)
+var mutex = &sync.Mutex{}
+var nextID = 1
+
+// Initialize/mock some data
+func init() {
+	teachers[nextID] = Teacher{
+		ID:        nextID,
+		FirstName: "John",
+		LastName:  "Doe",
+		Classroom: "9A",
+		Subject:   "Math",
+	}
+	nextID++
+
+	teachers[nextID] = Teacher{
+		ID:        nextID,
+		FirstName: "Jane",
+		LastName:  "Doe",
+		Classroom: "10A",
+		Subject:   "Algebra",
+	}
+	nextID++
+
+	teachers[nextID] = Teacher{
+		ID:        nextID,
+		FirstName: "Jane",
+		LastName:  "Smith",
+		Classroom: "11A",
+		Subject:   "Calculus",
+	}
+	nextID++
+}
+
+func getTeachersHandler(w http.ResponseWriter, r *http.Request) {
+
+	path := strings.TrimPrefix(r.URL.Path, "/teachers/")
+	idStr := strings.TrimSuffix(path, "/")
+
+	if idStr == "" {
+		firstName := r.URL.Query().Get("first_name")
+		lastName := r.URL.Query().Get("last_name")
+
+		// teacherList := []Teacher{}
+		teacherList := make([]Teacher, 0, len(teachers))
+
+		for _, teacher := range teachers {
+			// Apply filters
+			if (firstName == "" || teacher.FirstName == firstName) && (lastName == "" || teacher.LastName == lastName) {
+				teacherList = append(teacherList, teacher)
+			}
+		}
+
+		response := struct {
+			Status string    `json:"status"`
+			Count  int       `json:"count"`
+			Data   []Teacher `json:"data"`
+		}{
+			Status: "success",
+			Count:  len(teacherList),
+			Data:   teacherList,
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
+	}
+
+	// Handle path Parameter
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	teacher, exists := teachers[id]
+	if !exists {
+		http.Error(w, "Teacher not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(teacher)
+
+}
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	logRequestDetails(r)
@@ -23,53 +120,53 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 func teachersHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
-		fmt.Fprintf(w, "Received %s request on '%s' route\n", r.Method, r.URL)
+		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL) // DEBUG
+
 	case http.MethodGet:
-		fmt.Fprintf(w, "Received %s request on '%s' route\n", r.Method, r.URL)
+		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL) // DEBUG
+		getTeachersHandler(w, r)
+
 	case http.MethodPut:
-		fmt.Fprintf(w, "Received %s request on '%s' route\n", r.Method, r.URL)
+		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL) // DEBUG
 	case http.MethodPatch:
-		fmt.Fprintf(w, "Received %s request on '%s' route\n", r.Method, r.URL)
+		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL) // DEBUG
 	case http.MethodDelete:
-		fmt.Fprintf(w, "Received %s request on '%s' route\n", r.Method, r.URL)
+		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL) // DEBUG
 	}
 
-	w.Write([]byte("Welcome brilliant teachers"))
-	fmt.Println("Welcome brilliant teachers")
+	w.Write([]byte("Welcome brilliant teachers")) // DEBUG
 }
 
 func studentsHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
-		fmt.Fprintf(w, "Received %s request on '%s' route\n", r.Method, r.URL)
+		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL) // DEBUG
 	case http.MethodGet:
-		fmt.Fprintf(w, "Received %s request on '%s' route\n", r.Method, r.URL)
+		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL) // DEBUG
 	case http.MethodPut:
-		fmt.Fprintf(w, "Received %s request on '%s' route\n", r.Method, r.URL)
+		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL) // DEBUG
 	case http.MethodPatch:
-		fmt.Fprintf(w, "Received %s request on '%s' route\n", r.Method, r.URL)
+		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL) // DEBUG
 	case http.MethodDelete:
-		fmt.Fprintf(w, "Received %s request on '%s' route\n", r.Method, r.URL)
+		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL) // DEBUG
 	}
-	w.Write([]byte("Howdy Y'all"))
-	fmt.Println("Howdy Y'all")
+	w.Write([]byte("Howdy Y'all")) // DEBUG
 }
 
 func execsHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
-		fmt.Fprintf(w, "Received %s request on '%s' route\n", r.Method, r.URL)
+		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL) // DEBUG
 	case http.MethodGet:
-		fmt.Fprintf(w, "Received %s request on '%s' route\n", r.Method, r.URL)
+		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL) // DEBUG
 	case http.MethodPut:
-		fmt.Fprintf(w, "Received %s request on '%s' route\n", r.Method, r.URL)
+		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL) // DEBUG
 	case http.MethodPatch:
-		fmt.Fprintf(w, "Received %s request on '%s' route\n", r.Method, r.URL)
+		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL) // DEBUG
 	case http.MethodDelete:
-		fmt.Fprintf(w, "Received %s request on '%s' route\n", r.Method, r.URL)
+		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL) // DEBUG
 	}
-	w.Write([]byte("Good morning Executives!"))
-	fmt.Println("Good morning Executives!")
+	w.Write([]byte("Good morning Executives!")) // DEBUG
 }
 
 func main() {
@@ -84,9 +181,9 @@ func main() {
 
 	// Routes
 	mux.HandleFunc("/", rootHandler)
-	mux.HandleFunc("/teachers", teachersHandler)
-	mux.HandleFunc("/students", studentsHandler)
-	mux.HandleFunc("/execs", execsHandler)
+	mux.HandleFunc("/teachers/", teachersHandler)
+	mux.HandleFunc("/students/", studentsHandler)
+	mux.HandleFunc("/execs/", execsHandler)
 
 	// Configure TLS
 	tlsConfig := &tls.Config{
