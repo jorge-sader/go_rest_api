@@ -78,17 +78,31 @@ func getTeachersHandler(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimSuffix(path, "/")
 
 	if idStr == "" {
-		firstName := r.URL.Query().Get("first_name")
-		lastName := r.URL.Query().Get("last_name")
+		query := `SELECT first_name, last_name, email, classroom, subject FROM teachers WHERE 1 = 1`
+		var args []any
+
+		query, args = addFilters(r, query, args)
+
+		rows, err := db.Query(query, args...)
+		if err == sql.ErrNoRows {
+			http.Error(w, "No matches found.", http.StatusNotFound)
+			return
+		} else if err != nil {
+			http.Error(w, "Error querying teachers.", http.StatusInternalServerError)
+			return
+		}
+		defer rows.Close()
 
 		// teacherList := []Teacher{}
-		teacherList := make([]models.Teacher, 0, len(teachers))
-
-		for _, teacher := range teachers {
-			// Apply filters
-			if (firstName == "" || teacher.FirstName == firstName) && (lastName == "" || teacher.LastName == lastName) {
-				teacherList = append(teacherList, teacher)
+		teacherList := make([]models.Teacher, 0)
+		for rows.Next() {
+			var teacher models.Teacher
+			err := rows.Scan(&teacher.FirstName, &teacher.LastName, &teacher.Email, &teacher.Classroom, &teacher.Subject)
+			if err != nil {
+				http.Error(w, "Error scanning database results.", http.StatusInternalServerError)
+				return
 			}
+			teacherList = append(teacherList, teacher)
 		}
 
 		response := struct {
@@ -124,6 +138,26 @@ func getTeachersHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(teacher)
+}
+
+func addFilters(r *http.Request, query string, args []any) (string, []any) {
+	params := map[string]string{
+		"first_name": "first_name",
+		"last_name":  "last_name",
+		"email":      "email",
+		"classroom":  "classroom",
+		"subject":    "subject",
+	}
+
+	for param, dbField := range params {
+		value := r.URL.Query().Get(param)
+		if value != "" {
+			query += " AND " + dbField + " = ?"
+			args = append(args, value)
+
+		}
+	}
+	return query, args
 }
 
 func addTeacherHandler(w http.ResponseWriter, r *http.Request) {
