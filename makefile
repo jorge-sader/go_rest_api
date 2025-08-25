@@ -28,6 +28,15 @@ run: check-go ## Run server
 	@echo "Starting the server..."
 	@go run $(MAIN_FILE)
 
+.PHONY: stop
+stop: ## Stop the running application
+	@echo "Stopping $(BINARY_NAME)..."
+	@-pkill -SIGTERM -f "$(BUILD_DIR)/$(BINARY_NAME)" || true
+	@echo "Stopped $(BINARY_NAME)!"
+
+.PHONY: restart
+restart: stop run ## Restart the application (stop then start)
+
 
 #============================
 # ---- Container Targets ----
