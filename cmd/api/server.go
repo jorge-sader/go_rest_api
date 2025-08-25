@@ -7,21 +7,35 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
-	mw "github.com/jorge-sader/go-rest-api/internal/api/middlewares"
+	"github.com/joho/godotenv"
+	"github.com/jorge-sader/go-rest-api/internal/api/middlewares"
+	"github.com/jorge-sader/go-rest-api/internal/api/repositories/sqlconnect"
 	"github.com/jorge-sader/go-rest-api/internal/api/router"
 	"github.com/jorge-sader/go-rest-api/pkg/utils"
 
 	"golang.org/x/net/http2"
 )
 
+func init() {
+	err := godotenv.Load("cmd/api/.env")
+	if err != nil {
+		log.Fatalln("error loading environment variables:", err)
+	}
+}
+
 func main() {
-
-	port := 3000
-
 	// Load certificate and key
 	cert := "cmd/api/cert.pem"
 	key := "cmd/api/key.pem"
+
+	// Connect to database
+	_, err := sqlconnect.ConnectDB()
+	if err != nil {
+		fmt.Println("error connecting to DB: ", err)
+		return
+	}
 
 	// Configure TLS
 	tlsConfig := &tls.Config{
@@ -33,9 +47,9 @@ func main() {
 	}
 
 	// TODO: uncomment/reevaluate after routes are done
-	// 	// rl := mw.NewRateLimiter(20, time.Minute)
+	// 	// rl := middlewares.NewRateLimiter(20, time.Minute)
 	//
-	// 	hppOptions := mw.HPPOptions{
+	// 	hppOptions := middlewares.HPPOptions{
 	// 		CheckQuery:                  true,
 	// 		CheckBody:                   true,
 	// 		CheckBodyOnlyForContentType: "application/x-www-form-urlencoded",
@@ -43,17 +57,22 @@ func main() {
 	// 	}
 
 	// secureMux establishes the middleware chain that secures our server
-	// secureMux := mw.Cors(rl.Middleware(mw.ResponseTime(mw.SecurityHeaders(mw.Compression(mw.Hpp(hppOptions)(mux))))))
+	// secureMux := middlewares.Cors(rl.Middleware(middlewares.ResponseTime(middlewares.SecurityHeaders(middlewares.Compression(middlewares.Hpp(hppOptions)(mux))))))
 	secureMux := utils.ApplyMiddlewares(router.Router(),
 		// Innermost (runs last, ends first)
-		// mw.Hpp(hppOptions), // TODO: uncomment/reevaluate after routes are done
-		// mw.Compression,     // TODO: uncomment/reevaluate after routes are done
-		mw.SecurityHeaders,
-		// mw.ResponseTime, // TODO: uncomment/reevaluate after routes are done
+		// middlewares.Hpp(hppOptions), // TODO: uncomment/reevaluate after routes are done
+		// middlewares.Compression,     // TODO: uncomment/reevaluate after routes are done
+		middlewares.SecurityHeaders,
+		// middlewares.ResponseTime, // TODO: uncomment/reevaluate after routes are done
 		// rl.Middleware,   // TODO: uncomment/reevaluate after routes are done
-		mw.Cors,
+		middlewares.Cors,
 		// Outermost (runs first, ends last)
 	)
+
+	port, err := strconv.Atoi(os.Getenv("SERVER_PORT"))
+	if err != nil {
+
+	}
 
 	// Create custom server
 	server := &http.Server{
@@ -63,7 +82,7 @@ func main() {
 	}
 
 	// Enable http2
-	err := http2.ConfigureServer(server, &http2.Server{})
+	err = http2.ConfigureServer(server, &http2.Server{})
 	if err != nil {
 		log.Println("Error enabling http2:", err)
 	}
