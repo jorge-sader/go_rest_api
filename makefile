@@ -20,6 +20,7 @@ COMPOSE_CMD := $(shell command -v podman-compose >/dev/null 2>&1 && echo "podman
 
 .PHONY: build
 build: check-go ## Build binary app
+	@mkdir -p $(BUILD_DIR)
 	@echo "Building the binary..."
 	@go build -o $(BUILD_DIR)/$(BINARY_NAME) $(MAIN_FILE)
 
@@ -28,14 +29,28 @@ run: check-go ## Run server
 	@echo "Starting the server..."
 	@go run $(MAIN_FILE)
 
-.PHONY: stop
-stop: ## Stop the running application
+.PHONY: run-cli
+run-cli: check-go build ## Run CLI app
+	@echo "Starting the CLI app..."
+	@$(BUILD_DIR)/$(BINARY_NAME) &
+
+.PHONY: start
+start: compose-up run ## Start database containers and server (web)
+
+.PHONY: start-cli
+start-cli: compose-up run-cli ## Start database containers and CLI app
+
+.PHONY: stop-cli
+stop-cli: ## Stop the CLI app
 	@echo "Stopping $(BINARY_NAME)..."
 	@-pkill -SIGTERM -f "$(BUILD_DIR)/$(BINARY_NAME)" || true
 	@echo "Stopped $(BINARY_NAME)!"
 
 .PHONY: restart
-restart: stop run ## Restart the application (stop then start)
+restart: compose-down clean compose-up run ## Restart the web app (stop containers, clean, start containers, run)
+
+.PHONY: restart-cli
+restart-cli: stop-cli compose-down clean compose-up run ## Restart the CLI app (stop process, stop containers, clean, start containers, run in background)
 
 
 #============================
@@ -55,9 +70,6 @@ compose-down: ## Stop database containers
 	@echo "Stopping DB Containers..."
 	@$(COMPOSE_CMD) down || { echo "Failed to stop containers!"; exit 1; }
 	@echo "DB Containers Stopped!"
-
-.PHONY: start 
-start: compose-up run ## Start database containers and run server
 
 
 #===============================
@@ -177,7 +189,43 @@ ci: fmt lint test build ## Run all checks for CI/CD
 # ---- Help ---- 
 #===============
 
+# .PHONY: help
+# help: ## Show available make targets
+# 	@echo "Available targets:"
+# 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
+
+# .PHONY: help
+# help: ## Show available make targets
+# 	@echo "Available targets (grouped by category):"
+# 	@echo "Shared Targets (web and CLI):"
+# 	@grep -E '^(build|test|coverage|cover|clean|fmt|lint|pretty|ci|check-go|new-ssl-cert|stage-all|unstage-all|diff|diff-file):.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
+# 	@echo "Web App Targets:"
+# 	@grep -E '^(run|start|restart):.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
+# 	@echo "CLI App Targets:"
+# 	@grep -E '^.*-cli:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
+# 	@echo "Container Targets:"
+# 	@grep -E '^(compose-up|compose-down):.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
+
 .PHONY: help
 help: ## Show available make targets
-	@echo "Available targets:"
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
+	@echo "========================================"
+	@echo "=---------------- HELP ----------------="
+	@echo "========================================"
+	@echo ""
+	@echo "Available targets (grouped by category):"
+	
+	@echo ""
+	@echo "Shared Targets (web and CLI):"
+	@grep -E '^(build|test|coverage|cover|clean|fmt|lint|pretty|ci|check-go|new-ssl-cert|stage-all|unstage-all|diff|diff-file):.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf " \033[36m%-15s\033[0m %s\n", $$1, $$2}'
+
+	@echo ""
+	@echo "Web App Targets:"
+	@grep -E '^(run|start|restart):.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf " \033[36m%-15s\033[0m %s\n", $$1, $$2}'
+
+	@echo ""
+	@echo "CLI App Targets:"
+	@grep -E '^[a-zA-Z_-]+-cli:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf " \033[36m%-15s\033[0m %s\n", $$1, $$2}'
+
+	@echo ""
+	@echo "Container Targets:"
+	@grep -E '^(compose-up|compose-down):.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf " \033[36m%-15s\033[0m %s\n", $$1, $$2}'
