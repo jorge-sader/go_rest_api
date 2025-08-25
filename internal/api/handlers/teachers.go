@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -8,6 +9,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/jorge-sader/go-rest-api/internal/api/repositories/sqlconnect"
 	"github.com/jorge-sader/go-rest-api/internal/models"
 )
 
@@ -62,11 +64,15 @@ func TeachersHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodDelete:
 		fmt.Printf("Received %s request on '%s' route\n", r.Method, r.URL) // DEBUG
 	}
-
-	w.Write([]byte("Welcome brilliant teachers")) // DEBUG
 }
 
 func getTeachersHandler(w http.ResponseWriter, r *http.Request) {
+	db, err := sqlconnect.ConnectDB()
+	if err != nil {
+		http.Error(w, "Error connecting to database", http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
 
 	path := strings.TrimPrefix(r.URL.Path, "/teachers/")
 	idStr := strings.TrimSuffix(path, "/")
@@ -106,35 +112,58 @@ func getTeachersHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	teacher, exists := teachers[id]
-	if !exists {
-		http.Error(w, "Teacher not found", http.StatusNotFound)
+	var teacher models.Teacher
+	err = db.QueryRow(`SELECT first_name, last_name, email, classroom, subject FROM teachers WHERE id = ?`, id).Scan(&teacher.FirstName, &teacher.LastName, &teacher.Email, &teacher.Classroom, &teacher.Subject)
+	if err == sql.ErrNoRows {
+		http.Error(w, "Teacher not found.", http.StatusNotFound)
+		return
+	} else if err != nil {
+		http.Error(w, "Error Querying teachers.", http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(teacher)
-
 }
 
 func addTeacherHandler(w http.ResponseWriter, r *http.Request) {
-	mutex.Lock()
-	defer mutex.Unlock()
+	db, err := sqlconnect.ConnectDB()
+	if err != nil {
+		http.Error(w, "Error connecting to database", http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
 
 	var newTeachers []models.Teacher
-	err := json.NewDecoder(r.Body).Decode(&newTeachers)
+	err = json.NewDecoder(r.Body).Decode(&newTeachers)
 	if err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
+	stmt, err := db.Prepare(`INSERT INTO teachers (first_name, last_name, email, classroom, subject) VALUES(?,?,?,?,?);`)
+	if err != nil {
+		http.Error(w, "error preparing SQL statement", http.StatusInternalServerError)
+		return
+	}
+	defer stmt.Close()
+
 	addedTeachers := make([]models.Teacher, len(newTeachers))
 	for i, newTeacher := range newTeachers {
-		newTeacher.ID = nextID
-		teachers[nextID] = newTeacher
+		res, err := stmt.Exec(newTeacher.FirstName, newTeacher.LastName, newTeacher.Email, newTeacher.Classroom, newTeacher.Subject)
+		if err != nil {
+			http.Error(w, "error executing the SQL statement", http.StatusInternalServerError)
+			return
+		}
+		lastID, err := res.LastInsertId()
+		if err != nil {
+			http.Error(w, "error retrieving last inserted ID", http.StatusInternalServerError)
+			return
+		}
+		newTeacher.ID = int(lastID)
 		addedTeachers[i] = newTeacher
-		nextID++
 	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	response := struct {
