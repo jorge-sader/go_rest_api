@@ -5,7 +5,7 @@ services:
     image: docker.io/library/mariadb:latest
     environment:
       - MYSQL_ROOT_PASSWORD=MySQLRootPassword
-      - MYSQL_DATABASE=go-rest-api
+      - MYSQL_DATABASE=school
       - MYSQL_USER=MySQLUser
       - MYSQL_PASSWORD=MySQLPassword
     ports:
