@@ -99,24 +99,7 @@ func getTeachersHandler(w http.ResponseWriter, r *http.Request) {
 
 		query, args = addFilters(r, query, args)
 
-		sortParams := r.URL.Query()["sort_by"]
-		if len(sortParams) > 0 {
-			query += " ORDER BY"
-			for i, param := range sortParams {
-				parts := strings.Split(param, ":")
-				if len(parts) != 2 {
-					continue
-				}
-				field, order := parts[0], parts[1]
-				if !isValidSortFiled(field) || !isValidSortOrder(order) {
-					continue
-				}
-				if i > 0 {
-					query += ","
-				}
-				query += " " + field + " " + order
-			}
-		}
+		query = addSorting(r, query)
 
 		rows, err := db.Query(query, args...)
 		if err == sql.ErrNoRows {
@@ -173,6 +156,28 @@ func getTeachersHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(teacher)
+}
+
+func addSorting(r *http.Request, query string) string {
+	sortParams := r.URL.Query()["sort_by"]
+	if len(sortParams) > 0 {
+		query += " ORDER BY"
+		for i, param := range sortParams {
+			parts := strings.Split(param, ":")
+			if len(parts) != 2 {
+				continue
+			}
+			field, order := parts[0], parts[1]
+			if !isValidSortFiled(field) || !isValidSortOrder(order) {
+				continue
+			}
+			if i > 0 {
+				query += ","
+			}
+			query += " " + field + " " + order
+		}
+	}
+	return query
 }
 
 // TODO: Could we not make this generic? (accept a Model/struct with JSON and DB tags and infer params via reflection?)
