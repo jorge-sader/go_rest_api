@@ -66,6 +66,22 @@ func TeachersHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func isValidSortOrder(sortOrder string) bool {
+	return sortOrder == "asc" || sortOrder == "desc"
+}
+
+// TODO: what happens if sortField is not on the map?
+func isValidSortFiled(sortField string) bool {
+	validFields := map[string]bool{
+		"first_name": true,
+		"last_name":  true,
+		"email":      true,
+		"classroom":  true,
+		"subject":    true,
+	}
+	return validFields[sortField]
+}
+
 func getTeachersHandler(w http.ResponseWriter, r *http.Request) {
 	db, err := sqlconnect.ConnectDB()
 	if err != nil {
@@ -78,10 +94,29 @@ func getTeachersHandler(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimSuffix(path, "/")
 
 	if idStr == "" {
-		query := `SELECT first_name, last_name, email, classroom, subject FROM teachers WHERE 1 = 1`
+		query := `SELECT id, first_name, last_name, email, classroom, subject FROM teachers WHERE 1 = 1`
 		var args []any
 
 		query, args = addFilters(r, query, args)
+
+		sortParams := r.URL.Query()["sort_by"]
+		if len(sortParams) > 0 {
+			query += " ORDER BY"
+			for i, param := range sortParams {
+				parts := strings.Split(param, ":")
+				if len(parts) != 2 {
+					continue
+				}
+				field, order := parts[0], parts[1]
+				if !isValidSortFiled(field) || !isValidSortOrder(order) {
+					continue
+				}
+				if i > 0 {
+					query += ","
+				}
+				query += " " + field + " " + order
+			}
+		}
 
 		rows, err := db.Query(query, args...)
 		if err == sql.ErrNoRows {
@@ -97,7 +132,7 @@ func getTeachersHandler(w http.ResponseWriter, r *http.Request) {
 		teacherList := make([]models.Teacher, 0)
 		for rows.Next() {
 			var teacher models.Teacher
-			err := rows.Scan(&teacher.FirstName, &teacher.LastName, &teacher.Email, &teacher.Classroom, &teacher.Subject)
+			err := rows.Scan(&teacher.ID, &teacher.FirstName, &teacher.LastName, &teacher.Email, &teacher.Classroom, &teacher.Subject)
 			if err != nil {
 				http.Error(w, "Error scanning database results.", http.StatusInternalServerError)
 				return
@@ -140,6 +175,7 @@ func getTeachersHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(teacher)
 }
 
+// TODO: Could we not make this generic? (accept a Model/struct with JSON and DB tags and infer params via reflection?)
 func addFilters(r *http.Request, query string, args []any) (string, []any) {
 	params := map[string]string{
 		"first_name": "first_name",
