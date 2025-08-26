@@ -7,45 +7,10 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"sync"
 
 	"github.com/jorge-sader/go-rest-api/internal/api/repositories/sqlconnect"
 	"github.com/jorge-sader/go-rest-api/internal/models"
 )
-
-var teachers = make(map[int]models.Teacher)
-var mutex = &sync.Mutex{}
-var nextID = 1
-
-// Initialize/mock some data
-func init() {
-	teachers[nextID] = models.Teacher{
-		ID:        nextID,
-		FirstName: "John",
-		LastName:  "Doe",
-		Classroom: "9A",
-		Subject:   "Math",
-	}
-	nextID++
-
-	teachers[nextID] = models.Teacher{
-		ID:        nextID,
-		FirstName: "Jane",
-		LastName:  "Doe",
-		Classroom: "10A",
-		Subject:   "Algebra",
-	}
-	nextID++
-
-	teachers[nextID] = models.Teacher{
-		ID:        nextID,
-		FirstName: "Jane",
-		LastName:  "Smith",
-		Classroom: "11A",
-		Subject:   "Calculus",
-	}
-	nextID++
-}
 
 func TeachersHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
