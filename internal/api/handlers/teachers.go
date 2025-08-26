@@ -325,24 +325,8 @@ func patchTeacherHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: Could we not make this generic? (accept a Model/struct with JSON and DB tags and infer params via reflection?)
 	updatedTeacher := existingTeacher
-	for k, v := range updates {
-		switch k {
-		case "first_name":
-			updatedTeacher.FirstName = v.(string)
-		case "last_name":
-			updatedTeacher.LastName = v.(string)
-		case "email":
-			updatedTeacher.Email = v.(string)
-		case "classroom":
-			updatedTeacher.Classroom = v.(string)
-		case "subject":
-			updatedTeacher.Subject = v.(string)
-		}
-	}
-
-	teacherVal := reflect.ValueOf(&existingTeacher).Elem()
+	teacherVal := reflect.ValueOf(&updatedTeacher).Elem()
 	teacherType := teacherVal.Type()
 
 	for k, v := range updates {
