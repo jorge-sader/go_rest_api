@@ -1,0 +1,12 @@
+[
+  { "id": 1, "room_number": "A101", "building": "Building A", "capacity": 50 },
+  { "id": 2, "room_number": "A102", "building": "Building A", "capacity": 40 },
+  { "id": 3, "room_number": "A103", "building": "Building A", "capacity": 45 },
+  { "id": 4, "room_number": "A104", "building": "Building A", "capacity": 50 },
+  { "id": 5, "room_number": "B201", "building": "Building B", "capacity": 60 },
+  { "id": 6, "room_number": "B202", "building": "Building B", "capacity": 55 },
+  { "id": 7, "room_number": "B203", "building": "Building B", "capacity": 50 },
+  { "id": 8, "room_number": "C301", "building": "Building C", "capacity": 40 },
+  { "id": 9, "room_number": "C302", "building": "Building C", "capacity": 45 },
+  { "id": 10, "room_number": "C303", "building": "Building C", "capacity": 50 }
+]
