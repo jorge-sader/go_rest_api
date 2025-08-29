@@ -1,0 +1,92 @@
+[
+  {
+    "id": 1,
+    "name": "HTML Fundamentals",
+    "description": "Basics of HTML structure and semantics.",
+    "total_hours": 20
+  },
+  {
+    "id": 2,
+    "name": "CSS Styling",
+    "description": "Styling web pages with CSS.",
+    "total_hours": 25
+  },
+  {
+    "id": 3,
+    "name": "JavaScript Basics",
+    "description": "Introduction to JavaScript programming.",
+    "total_hours": 30
+  },
+  {
+    "id": 4,
+    "name": "Advanced JavaScript",
+    "description": "ES6+ features and asynchronous programming.",
+    "total_hours": 40
+  },
+  {
+    "id": 5,
+    "name": "React.js",
+    "description": "Building user interfaces with React.",
+    "total_hours": 50
+  },
+  {
+    "id": 6,
+    "name": "Node.js",
+    "description": "Server-side JavaScript with Node.js.",
+    "total_hours": 45
+  },
+  {
+    "id": 7,
+    "name": "Express.js",
+    "description": "Web framework for Node.js.",
+    "total_hours": 35
+  },
+  {
+    "id": 8,
+    "name": "SQL Databases",
+    "description": "Relational databases and SQL queries.",
+    "total_hours": 40
+  },
+  {
+    "id": 9,
+    "name": "MongoDB",
+    "description": "NoSQL database with MongoDB.",
+    "total_hours": 35
+  },
+  {
+    "id": 10,
+    "name": "RESTful APIs",
+    "description": "Designing and consuming REST APIs.",
+    "total_hours": 30
+  },
+  {
+    "id": 11,
+    "name": "Authentication & Security",
+    "description": "User auth and web security best practices.",
+    "total_hours": 25
+  },
+  {
+    "id": 12,
+    "name": "Deployment & DevOps",
+    "description": "Deploying apps and CI/CD pipelines.",
+    "total_hours": 50
+  },
+  {
+    "id": 13,
+    "name": "Version Control with Git",
+    "description": "Using Git for source control.",
+    "total_hours": 20
+  },
+  {
+    "id": 14,
+    "name": "Agile Methodologies",
+    "description": "Agile development practices.",
+    "total_hours": 25
+  },
+  {
+    "id": 15,
+    "name": "Project Management",
+    "description": "Managing web development projects.",
+    "total_hours": 30
+  }
+]
