@@ -1,5 +1,6 @@
 [
   {
+    "id": 1,
     "first_name": "Alice",
     "last_name": "Smith",
     "email": "alice.smith@example.com",
@@ -8,75 +9,102 @@
     "role": "admin"
   },
   {
-    "first_name": "Bob",
-    "last_name": "Johnson",
-    "email": "bob.johnson@example.com",
-    "username": "bob.johnson",
+    "id": 2,
+    "first_name": "Robert",
+    "last_name": "Brown",
+    "email": "robert.brown@example.com",
+    "username": "robert.brown",
     "password": "securepassword2",
+    "role": "principal"
+  },
+  {
+    "id": 3,
+    "first_name": "Emma",
+    "last_name": "Johnson",
+    "email": "emma.johnson@example.com",
+    "username": "emma.johnson",
+    "password": "securepassword3",
     "role": "admin"
   },
   {
-    "first_name": "Charlie",
-    "last_name": "Brown",
-    "email": "charlie.brown@example.com",
-    "username": "charlie.brown",
-    "password": "securepassword3",
-    "role": "manager"
-  },
-  {
-    "first_name": "Diana",
-    "last_name": "White",
-    "email": "diana.white@example.com",
-    "username": "diana.white",
+    "id": 4,
+    "first_name": "Michael",
+    "last_name": "Davis",
+    "email": "michael.davis@example.com",
+    "username": "michael.davis",
     "password": "securepassword4",
-    "role": "manager"
+    "role": "registrar"
   },
   {
-    "first_name": "Edward",
-    "last_name": "Taylor",
-    "email": "edward.taylor@example.com",
-    "username": "edward.taylor",
+    "id": 5,
+    "first_name": "Sarah",
+    "last_name": "Wilson",
+    "email": "sarah.wilson@example.com",
+    "username": "sarah.wilson",
     "password": "securepassword5",
-    "role": "manager"
+    "role": "counselor"
   },
   {
-    "first_name": "Fiona",
-    "last_name": "Martin",
-    "email": "fiona.martin@example.com",
-    "username": "fiona.martin",
+    "id": 6,
+    "first_name": "James",
+    "last_name": "Martinez",
+    "email": "james.martinez@example.com",
+    "username": "james.martinez",
     "password": "securepassword6",
-    "role": "exec"
+    "role": "admin"
   },
   {
-    "first_name": "George",
-    "last_name": "Anderson",
-    "email": "george.anderson@example.com",
-    "username": "george.anderson",
+    "id": 7,
+    "first_name": "Laura",
+    "last_name": "Garcia",
+    "email": "laura.garcia@example.com",
+    "username": "laura.garcia",
     "password": "securepassword7",
-    "role": "exec"
+    "role": "principal"
   },
   {
-    "first_name": "Hannah",
-    "last_name": "Thomas",
-    "email": "hannah.thomas@example.com",
-    "username": "hannah.thomas",
+    "id": 8,
+    "first_name": "David",
+    "last_name": "Lee",
+    "email": "david.lee@example.com",
+    "username": "david.lee",
     "password": "securepassword8",
-    "role": "exec"
+    "role": "registrar"
   },
   {
-    "first_name": "Ian",
-    "last_name": "Moore",
-    "email": "ian.moore@example.com",
-    "username": "ian.moore",
+    "id": 9,
+    "first_name": "Emily",
+    "last_name": "Taylor",
+    "email": "emily.taylor@example.com",
+    "username": "emily.taylor",
     "password": "securepassword9",
-    "role": "exec"
+    "role": "counselor"
   },
   {
-    "first_name": "Jasmine",
-    "last_name": "Jackson",
-    "email": "jasmine.jackson@example.com",
-    "username": "jasmine.jackson",
+    "id": 10,
+    "first_name": "Thomas",
+    "last_name": "Moore",
+    "email": "thomas.moore@example.com",
+    "username": "thomas.moore",
     "password": "securepassword10",
-    "role": "exec"
+    "role": "admin"
+  },
+  {
+    "id": 11,
+    "first_name": "Anna",
+    "last_name": "Rodriguez",
+    "email": "anna.rodriguez@example.com",
+    "username": "anna.rodriguez",
+    "password": "securepassword11",
+    "role": "principal"
+  },
+  {
+    "id": 12,
+    "first_name": "Mark",
+    "last_name": "Hernandez",
+    "email": "mark.hernandez@example.com",
+    "username": "mark.hernandez",
+    "password": "securepassword12",
+    "role": "counselor"
   }
 ]
