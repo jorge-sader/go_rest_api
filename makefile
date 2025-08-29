@@ -166,6 +166,9 @@ diff-file: stage-all ## Save diff to $(DIFF_OUTPUT_FILE)
 	@echo "Diff saved to $(DIFF_OUTPUT_FILE)."
 	@$(MAKE) unstage-all
 
+.PHONY: git-undo
+git-undo: ## Undoes the last git commit
+	git reset --soft HEAD~1
 
 #=============================
 # ---- Validation Targets ---- 
